@@ -1,0 +1,99 @@
+<?php
+
+use App\Http\Controllers\Admin\TestController;
+use App\Http\Controllers\Admin\TestQuestionController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\DayTaskController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ChatbotController; // ✅ أضفنا ده هنا
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
+use App\Http\Controllers\LibraryController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+
+Route::get('/clear-cache', function () {
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('cache:clear');
+    return "✅ Cache cleared successfully!";
+});
+
+Route::get('/storage-link', function () {
+    Artisan::call('storage:link');
+    return "✅ Storage linked successfully!";
+});
+
+
+Route::get('/clear-cache', function () {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('view:clear');
+    return 'Cache cleared!';
+});
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Route::middleware('auth')->group(function () {
+//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// });
+
+Route::get('/', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
+Route::get('/library', [LibraryController::class, 'index'])->middleware(['auth', 'verified'])->name('library.index');
+Route::get('/library/preview/{id}', [LibraryController::class, 'preview'])->middleware(['auth', 'verified'])->name('library.preview');
+Route::post('/library/upload', [LibraryController::class, 'upload'])->middleware(['auth', 'verified'])->name('library.upload');
+Route::delete('/library/{filename}', [LibraryController::class, 'destroy'])->middleware(['auth', 'verified'])->name('library.destroy');
+Route::get('/library/download/{id}', [LibraryController::class, 'download'])->name('library.download');
+Route::get('/day/{id}', [HomeController::class, 'show'])->name('day.show');
+Route::post('/day/{id}/upload', [HomeController::class, 'storeUserUpload'])->name('day.upload');
+Route::post('/day/{id}/complete', [HomeController::class, 'completeDay'])->name('day.complete');
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+Route::get('/tests', [TestController::class, 'index'])->name('tests.index');
+Route::get('/tests/{id}', [TestController::class, 'show'])->name('tests.show');
+Route::post('/tests/{test}/submit', [TestController::class, 'submitTest'])->name('tests.submit');
+
+// FAQ Routes
+Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
+
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::post('/upload-video/{day}', [AdminController::class, 'uploadVideo'])->name('admin.upload.video');
+    Route::post('/toggle-day/{day}', [AdminController::class, 'toggleDayStatus'])->name('admin.toggle.day');
+    Route::get('/admin/day-tasks', [DayTaskController::class, 'index'])->name('admin.tasks');
+    Route::post('/admin/day-tasks', [DayTaskController::class, 'store'])->name('admin.tasks.store');
+    Route::get('test-questions', [TestQuestionController::class, 'index'])->name('admin.test_questions.index');
+    Route::get('test-questions/create', [TestQuestionController::class, 'create'])->name('admin.test_questions.create');
+    Route::post('test-questions', [TestQuestionController::class, 'store'])->name('admin.test_questions.store');
+    Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
+    Route::get('/users/file-preview/{upload}', [UserController::class, 'previewFile'])->name('admin.users.file-preview');
+    
+    // Admin FAQ Routes
+    Route::resource('faq', AdminFaqController::class)->names([
+        'index' => 'admin.faq.index',
+        'create' => 'admin.faq.create',
+        'store' => 'admin.faq.store',
+        'edit' => 'admin.faq.edit',
+        'update' => 'admin.faq.update',
+        'destroy' => 'admin.faq.destroy',
+    ]);
+});
+
+Route::get("/chatbot-suggestions", [ChatbotController::class, "getSuggestions"]);
+
+// ✅ Route الخاص بالشات بوت (مفتوح لأي زائر للموقع)
+Route::post("/chatbot", [ChatbotController::class, "chat"]);
+Route::get("/chatbot/questions", [ChatbotController::class, "getQuestions"]);
+
+require __DIR__ . '/auth.php';
