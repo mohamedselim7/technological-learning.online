@@ -12,12 +12,10 @@
 
         <h3 class="mb-4">قائمة الأسئلة</h3>
 
-       
         <a href="{{ route('admin.test_questions.create') }}" class="btn btn-primary mb-3">
             إضافة سؤال جديد
         </a>
 
-        
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -28,10 +26,11 @@
                     <tr>
                         <th>#</th>
                         <th>The Exam</th>
-                        <th>qustion</th>
+                        <th>Question</th>
                         <th>Options</th>
                         @if (auth()->check() && auth()->user()->role === 'admin')
-                            <th>The Correct Answer </th>
+                            <th>The Correct Answer</th>
+                            <th>Actions</th>
                         @endif
                     </tr>
                 </thead>
@@ -47,8 +46,20 @@
                                 C) {{ $q->option_c }} <br>
                                 D) {{ $q->option_d }}
                             </td>
-                            @if (!empty($q->your_answer) && isset($answerMap[$q->your_answer]))
-                                {{ $answerMap[$q->your_answer] }}
+                            @if (auth()->check() && auth()->user()->role === 'admin')
+                                <td>
+                                    {{ $q->correct_answer }}
+                                </td>
+                                <td>
+                                   
+                                    <form action="{{ route('admin.test_questions.destroy', $q->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('هل أنت متأكد من حذف هذا السؤال؟');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
                             @endif
                         </tr>
                     @endforeach

@@ -46,4 +46,11 @@ class TestQuestionController extends Controller
 
         return redirect()->route('admin.test_questions.index')->with('success', 'تم إضافة السؤال بنجاح');
     }
+    public function destroy($id)
+{
+    $question = \App\Models\TestQuestion::findOrFail($id);
+    $question->delete();
+
+    return redirect()->route('admin.test_questions.index');
+}
 }

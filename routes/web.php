@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('library/create', [LibraryManagementController::class, 'create'])->name('library.create');
         Route::post('library', [LibraryManagementController::class, 'store'])->name('library.store');
         Route::delete('library/{id}', [LibraryManagementController::class, 'destroy'])->name('library.destroy');
+
     });
 
 });
@@ -116,6 +117,8 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('test-questions', [TestQuestionController::class, 'index'])->name('admin.test_questions.index');
     Route::get('test-questions/create', [TestQuestionController::class, 'create'])->name('admin.test_questions.create');
     Route::post('test-questions', [TestQuestionController::class, 'store'])->name('admin.test_questions.store');
+    Route::delete('/admin/test_questions/{id}', [TestQuestionController::class, 'destroy'])
+    ->name('admin.test_questions.destroy');
     
     // Users
     Route::get('/users', [UserController::class, 'index'])->name('admin.users');
